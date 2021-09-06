@@ -41,4 +41,11 @@ Expected output:
 
 # TODO: implement your solution for pseudo code!
 
+substring = str(TOTAL)
+
+if substring in TEXT:
+    OUTPUT = "true that"
+else:
+    OUTPUT = "nope"
+
 print("Value of 'TOTAL' exists in string: {}".format(OUTPUT))  # DO NOT MODIFY
