@@ -35,6 +35,17 @@ def authenticate_user(credentials: str) -> bool:
     '''
     pass  # TODO: Replace with implementation!
 
+    credentials_list = credentials.split()     #creating a list from the input credentials
+    username = credentials_list[0:2]           #creating new list with the first two items to username
+    password = credentials_list[2]             #creating new list with the last item to password
+    user_tmp = format_username(username)       #sending username list to format_username function and creating a user_tmp from the result
+    pass_tmp = decrypt_password(password)      #sending password list to decrypt_password function  and creating a pass_tmp from the result
+
+    if pass_tmp == agents[user_tmp]:           #checking if user_tmp and pass_tmp are in agents
+        return True
+    else:
+        return False
+
 
 def format_username(username: list) -> str:
     """Procedure to format user provided username"""
@@ -46,6 +57,13 @@ def format_username(username: list) -> str:
     RETURN formatted username as string value.
     '''
     pass  # TODO: Replace with implementation!
+
+    user = "_".join(username)  # creating a string from the username list with _ in between
+    user_tmp = user.title()  # changing the format to title
+
+    return user_tmp  # returning the end value
+
+
 
 
 def decrypt_password(password: str) -> str:
@@ -64,6 +82,28 @@ def decrypt_password(password: str) -> str:
     RETURN decrypted string value
     '''
     pass  # TODO: Replace with implementation!
+
+    pass_tmp = ""
+
+    for i, char in enumerate(list(password)):  # for loop to run through each character and index
+        if i % 2 == 0:  # if/else for determing if index is even or odd
+            if char in vowels:  # decryption of character + adding "0" on each side if vowel
+                tmp = chr(ord(char) + rot7)
+                tmp = "0" + tmp + "0"
+                pass_tmp += tmp
+            else:
+                tmp = chr(ord(char) + rot7)
+                pass_tmp += tmp
+        else:
+            if char in vowels:
+                tmp = chr(ord(char) + rot9)
+                tmp = "0" + tmp + "0"
+                pass_tmp += tmp
+            else:
+                tmp = chr(ord(char) + rot9)
+                pass_tmp += tmp
+
+    return pass_tmp
 
 
 def main():
