@@ -33,7 +33,7 @@ def authenticate_user(credentials: str) -> bool:
     VALIDATE that both values corresponds to expected credentials existing within dictionary.
     RETURN outcome of validation as BOOLEAN VALUE.
     '''
-    pass  # TODO: Replace with implementation!
+
 
     credentials_list = credentials.split()     #creating a list from the input credentials
     username = credentials_list[0:2]           #creating new list with the first two items to username
@@ -56,7 +56,7 @@ def format_username(username: list) -> str:
     REPLACE empty space between given name and surname with UNDERSCORE '_'
     RETURN formatted username as string value.
     '''
-    pass  # TODO: Replace with implementation!
+
 
     user = "_".join(username)  # creating a string from the username list with _ in between
     user_tmp = user.title()  # changing the format to title
@@ -81,7 +81,7 @@ def decrypt_password(password: str) -> str:
     }
     RETURN decrypted string value
     '''
-    pass  # TODO: Replace with implementation!
+
 
     pass_tmp = ""
 
