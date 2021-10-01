@@ -30,12 +30,28 @@ def create_logger() -> logging.Logger:
     """Create and return logger object."""
     pass  # TODO: Replace with implementation!
 
+    file_path = RESOURCES / 'ass3_log_conf.json'
+    with open(file_path, 'r') as file_hand:
+        config = json.load(file_hand)
+        logging.config.dictConfig(config)
+
+    LOGGER = logging.getLogger('ass_3_logger')
+    return LOGGER
+
 
 def measurements_decorator(func):
     """Function decorator, used for time measurements."""
     @wraps(func)
     def wrapper(nth_nmb: int) -> tuple:
         pass  # TODO: Replace with implementation!
+
+        start_time = 0
+        LOGGER.info("Starting measurements...")
+
+        for
+
+        timeit.default_timer
+
 
     return wrapper
 
@@ -66,6 +82,13 @@ def fibonacci_memory(nth_nmb: int) -> int:
     """An recursive approach to find Fibonacci sequence value, storing those already calculated."""
     pass  # TODO: Replace with implementation!
 
+    memory = {0: 0, 1: 1}
+
+    if not nth_nmb in memory:
+        nth_nmb = (nth_nmb-1) + (nth_nmb-2)
+        memory.update(nth_nmb)
+    return nth_nmb
+
 
 def duration_format(duration: float, precision: str) -> str:
     """Function to convert number into string. Switcher is dictionary type here.
@@ -91,7 +114,6 @@ def print_statistics(fib_details: dict, nth_value: int):
 def write_to_file(fib_details: dict):
     """Function to write information to file."""
     pass  # TODO: Replace with implementation!
-
 
 def main():
     """The main program execution. YOU MAY NOT MODIFY ANYTHING IN THIS FUNCTION!!"""
