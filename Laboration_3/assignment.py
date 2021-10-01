@@ -48,8 +48,6 @@ def measurements_decorator(func):
         start_time = 0
         LOGGER.info("Starting measurements...")
 
-        for
-
         timeit.default_timer
 
 
