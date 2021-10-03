@@ -11,7 +11,7 @@ for those functions which are needed:
  - print_statistics(..)
  - write_to_file(..)
 """
-
+import itertools
 from pathlib import Path
 from timeit import default_timer as timer
 from functools import wraps
@@ -31,11 +31,12 @@ def create_logger() -> logging.Logger:
     pass  # TODO: Replace with implementation!
 
     file_path = RESOURCES / 'ass3_log_conf.json'
-    with open(file_path, 'r') as file_hand:
+    with open(file_path, 'r', encoding='utf-8') as file_hand:
         config = json.load(file_hand)
         logging.config.dictConfig(config)
 
     LOGGER = logging.getLogger('ass_3_logger')
+
     return LOGGER
 
 
@@ -45,10 +46,20 @@ def measurements_decorator(func):
     def wrapper(nth_nmb: int) -> tuple:
         pass  # TODO: Replace with implementation!
 
-        start_time = 0
-        LOGGER.info("Starting measurements...")
+        fib_values = []
 
-        timeit.default_timer
+        LOGGER.info("Starting measurements...")
+        start_time = timer()
+
+        for val in itertools.count(start=nth_nmb, step=-1):
+            print(f'{val}: {fibonacci(nth_nmb)}')
+            if val <= 0:
+                break
+
+        end_time = timer()
+        duration = end_time - start_time
+        print(duration)
+
 
 
     return wrapper
@@ -82,7 +93,7 @@ def fibonacci_memory(nth_nmb: int) -> int:
 
     memory = {0: 0, 1: 1}
 
-    if not nth_nmb in memory:
+    if nth_nmb not in memory:
         nth_nmb = (nth_nmb-1) + (nth_nmb-2)
         memory.update(nth_nmb)
     return nth_nmb
@@ -112,6 +123,7 @@ def print_statistics(fib_details: dict, nth_value: int):
 def write_to_file(fib_details: dict):
     """Function to write information to file."""
     pass  # TODO: Replace with implementation!
+
 
 def main():
     """The main program execution. YOU MAY NOT MODIFY ANYTHING IN THIS FUNCTION!!"""
