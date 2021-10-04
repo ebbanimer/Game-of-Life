@@ -46,21 +46,20 @@ def measurements_decorator(func):
     def wrapper(nth_nmb: int) -> tuple:
         pass  # TODO: Replace with implementation!
 
-        fib_values = []
-
-        LOGGER.info("Starting measurements...")
+        nth_values = []
         start_time = timer()
+        LOGGER.info("Starting measurements...")
 
-        for val in itertools.count(start=nth_nmb, step=-1):
-            print(f'{val}: {fibonacci(nth_nmb)}')
-            if val <= 0:
-                break
+        for i in range(nth_nmb, -1, -1):
+            nth_value = func(i)
+            nth_values.append(nth_value)
+
+            LOGGER.debug(f'{i}: {nth_value}')
+
 
         end_time = timer()
         duration = end_time - start_time
-        print(duration)
-
-
+        return duration
 
     return wrapper
 
@@ -93,10 +92,13 @@ def fibonacci_memory(nth_nmb: int) -> int:
 
     memory = {0: 0, 1: 1}
 
-    if nth_nmb not in memory:
-        nth_nmb = (nth_nmb-1) + (nth_nmb-2)
-        memory.update(nth_nmb)
-    return nth_nmb
+    def fib_cal(nth_val):
+        if nth_val not in memory:
+            return nth_val
+        else:
+            nth_value = (nth_val-1) + (nth_val-2)
+            memory.update(nth_val)
+    return fib_cal(nth_nmb)
 
 
 def duration_format(duration: float, precision: str) -> str:
