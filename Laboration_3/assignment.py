@@ -106,8 +106,6 @@ def fibonacci_memory(nth_nmb: int) -> int:
     return num
 
 
-
-
 def duration_format(duration: float, precision: str) -> str:
     """Function to convert number into string. Switcher is dictionary type here.
     YOU MAY NOT MODIFY ANYTHING IN THIS FUNCTION!!"""
