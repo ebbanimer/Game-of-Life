@@ -54,8 +54,8 @@ def measurements_decorator(func):
             nth_value = func(i)
             nth_values.append(nth_value)
 
-            LOGGER.debug(f'{i}: {nth_value}')
-
+            if i % 5 == 0:
+                LOGGER.debug(f'{i}: {nth_value}')
 
         end_time = timer()
         duration = end_time - start_time
@@ -92,13 +92,20 @@ def fibonacci_memory(nth_nmb: int) -> int:
 
     memory = {0: 0, 1: 1}
 
-    def fib_cal(nth_val):
-        if nth_val not in memory:
-            return nth_val
-        else:
-            nth_value = (nth_val-1) + (nth_val-2)
-            memory.update(nth_val)
-    return fib_cal(nth_nmb)
+    if nth_nmb in memory:
+        return memory[nth_nmb]
+
+    def fib_cal(n):
+        return n if n <= 1 else \
+            fib_cal(n - 1) + fib_cal(n - 2)
+
+    num = fib_cal(nth_nmb)
+
+    new_memory = {nth_nmb: num}
+    memory.update(new_memory)
+    return num
+
+
 
 
 def duration_format(duration: float, precision: str) -> str:
