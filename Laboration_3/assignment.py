@@ -128,11 +128,9 @@ def print_statistics(fib_details: dict, nth_value: int):
     line = '\n' + ("---------------" * 5)
     pass  # TODO: Replace with implementation!
 
-    main_header = "\t\t\tDURATION FOR EACH APPROACH WITHIN INTERVAL: 30-0"
-    print(f'{line}\n{main_header}{line}')
+    print(f'{line}\n\t\t\tDURATION FOR EACH APPROACH WITHIN INTERVAL: 30-0{line}')
 
-    column_headers = "\t\t\t\t\tSeconds\t\tMilliseconds\t\tMicroseconds\t\tNanoseconds"
-    print(column_headers)
+    print("\t\t\t\t\tSeconds\t\tMilliseconds\tMicroseconds\tNanoseconds")
 
     for key in fib_details:
         print(key.title())
@@ -144,22 +142,6 @@ def print_statistics(fib_details: dict, nth_value: int):
         print(duration_format(fib_details[val][0], 'Nanoseconds'))
 
 
-
-    #print(duration_format(fib_details['fib iteration'][0], 'Seconds'))
-    #print(duration_format(fib_details['fib recursion'][0], 'Seconds'))
-    #print(duration_format(fib_details['fib memory'][0], 'Seconds'))
-
-    #print(duration_format(fib_details['fib iteration'][0], 'Milliseconds'))
-    #print(duration_format(fib_details['fib recursion'][0], 'Milliseconds'))
-    #print(duration_format(fib_details['fib memory'][0], 'Milliseconds'))
-
-    #print(duration_format(fib_details['fib iteration'][0], 'Microseconds'))
-    #print(duration_format(fib_details['fib recursion'][0], 'Microseconds'))
-    #print(duration_format(fib_details['fib memory'][0], 'Microseconds'))
-
-    #print(duration_format(fib_details['fib iteration'][0], 'Nanoseconds'))
-    #print(duration_format(fib_details['fib recursion'][0], 'Nanoseconds'))
-    #print(duration_format(fib_details['fib memory'][0], 'Nanoseconds'))
 
 
 def write_to_file(fib_details: dict):
