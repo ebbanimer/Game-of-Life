@@ -46,20 +46,21 @@ def measurements_decorator(func):
     def wrapper(nth_nmb: int) -> tuple:
         pass  # TODO: Replace with implementation!
 
-        nth_values = []
+        nth_list = []
         start_time = timer()
         LOGGER.info("Starting measurements...")
 
         for i in range(nth_nmb, -1, -1):
-            nth_value = func(i)
-            nth_values.append(nth_value)
+            nth_val = func(i)
+            nth_list.append(nth_val)
 
             if i % 5 == 0:
-                LOGGER.debug(f'{i}: {nth_value}')
+                LOGGER.debug(f'{i}: {nth_val}')
 
         end_time = timer()
         duration = end_time - start_time
-        return duration
+
+        return duration, nth_list
 
     return wrapper
 
@@ -127,9 +128,30 @@ def print_statistics(fib_details: dict, nth_value: int):
     pass  # TODO: Replace with implementation!
 
 
+    print(line)
+    main_header = "\t\t\tDURATION FOR EACH APPROACH WITHIN INTERVAL: 30-0"
+    print(f'{main_header}{line}')
+
+    column_headers = "\t\t\t\t\tSeconds\t\tMilliseconds\t\tMicroseconds\t\tNanoseconds"
+    print(column_headers)
+
+    row_headers = fib_details.keys()
+    row_headers = "\n".join(row_headers).title()
+    print(row_headers)
+
+    print(duration_format(0.5, 'Seconds'))
+    print(duration_format(0.5, 'Milliseconds'))
+
+
+
+
+
+
 def write_to_file(fib_details: dict):
     """Function to write information to file."""
     pass  # TODO: Replace with implementation!
+
+    
 
 
 def main():
