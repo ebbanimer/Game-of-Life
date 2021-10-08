@@ -128,9 +128,9 @@ def print_statistics(fib_details: dict, nth_value: int):
     #print(line.count())
 
     main_header = "DURATION FOR EACH APPROACH WITHIN INTERVAL: 30-0"
-    print(f'{line}\n\t\t\t{main_header}{line}')
+    print(f'{line}\n{main_header : ^10}{line}')
 
-    print("\t\t\t\t\tSeconds\t\tMilliseconds\tMicroseconds\tNanoseconds")
+    print(f"Seconds\t\tMilliseconds\tMicroseconds\tNanoseconds:>75")
 
     for key, val in fib_details.items():
 
@@ -139,7 +139,9 @@ def print_statistics(fib_details: dict, nth_value: int):
         microsecs = (duration_format(fib_details[key][0], 'Microseconds'))
         nanosecs = (duration_format(fib_details[key][0], 'Nanoseconds'))
 
-        print(f'{key.title()}{secs:<5}{millisecs:>2}{microsecs:>5}{nanosecs:>15}')
+
+
+        print(f'{key.title(): <10}{secs : ^10}{millisecs : ^10}{microsecs: ^5}{nanosecs : >5}')
 
 
 def write_to_file(fib_details: dict):
@@ -153,8 +155,8 @@ def write_to_file(fib_details: dict):
             sequences = list(reversed(range(0, len(fib_values))))
             
             for i, fib_val in zip(sequences, fib_values):
-                file.write(f'{i}: {fib_val}')
-            
+                file.write(f'{i}: {fib_val}\n')
+
 
 
 def main():
