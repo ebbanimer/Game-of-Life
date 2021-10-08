@@ -94,9 +94,6 @@ def fibonacci_memory(nth_nmb: int) -> int:
 
     memory = {0: 0, 1: 1}
 
-    if nth_nmb in memory:
-        return memory[nth_nmb]
-
     def fib_cal(n):
         return n if n <= 1 else \
             fib_cal(n - 1) + fib_cal(n - 2)
@@ -128,30 +125,36 @@ def print_statistics(fib_details: dict, nth_value: int):
     line = '\n' + ("---------------" * 5)
     pass  # TODO: Replace with implementation!
 
-    print(f'{line}\n\t\t\tDURATION FOR EACH APPROACH WITHIN INTERVAL: 30-0{line}')
+    #print(line.count())
+
+    main_header = "DURATION FOR EACH APPROACH WITHIN INTERVAL: 30-0"
+    print(f'{line}\n\t\t\t{main_header}{line}')
 
     print("\t\t\t\t\tSeconds\t\tMilliseconds\tMicroseconds\tNanoseconds")
 
-    for key in fib_details:
-        print(key.title())
+    for key, val in fib_details.items():
 
-    for val in fib_details:
-        print(duration_format(fib_details[val][0], 'Seconds'))
-        print(duration_format(fib_details[val][0], 'Milliseconds'))
-        print(duration_format(fib_details[val][0], 'Microseconds'))
-        print(duration_format(fib_details[val][0], 'Nanoseconds'))
+        secs = (duration_format(fib_details[key][0], 'Seconds'))
+        millisecs = (duration_format(fib_details[key][0], 'Milliseconds'))
+        microsecs = (duration_format(fib_details[key][0], 'Microseconds'))
+        nanosecs = (duration_format(fib_details[key][0], 'Nanoseconds'))
 
-
+        print(f'{key.title()}{secs:<5}{millisecs:>2}{microsecs:>5}{nanosecs:>15}')
 
 
 def write_to_file(fib_details: dict):
     """Function to write information to file."""
     pass  # TODO: Replace with implementation!
 
-    #for key in fib_details:
-    #    with open('_Resources/fib_iteration.txt', 'w', encoding='utf-8') as iter_stats:
-    #        for zip(seq, val) in fib_details:
 
+    for key, val in fib_details.items():
+        with open(f"{RESOURCES}/{key.replace(' ', '_')}.txt", "w", encoding="utf-8") as file:
+            fib_values = fib_details[key][1]
+            sequences = list(reversed(range(0, len(fib_values))))
+            
+            for i, fib_val in zip(sequences, fib_values):
+                file.write(f'{i}: {fib_val}')
+            
 
 
 def main():
