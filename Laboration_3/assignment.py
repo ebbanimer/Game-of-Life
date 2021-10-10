@@ -93,9 +93,9 @@ def fibonacci_memory(nth_nmb: int) -> int:
 
     def fib_cal(n):
         return n if n <= 1 else fib_cal(n - 1) + fib_cal(n - 2)
-
     num = fib_cal(nth_nmb)
-    memory[nth_nmb] = num
+    new_memory = {nth_nmb: num}
+    memory.update(new_memory)
     return num
 
 
