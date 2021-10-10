@@ -58,7 +58,7 @@ def measurements_decorator(func):
         end_time = timer()
         duration = end_time - start_time
 
-        return duration, nth_list
+        return duration, nth_list                          #returning the output as a tuple
 
 
     return wrapper
@@ -93,9 +93,9 @@ def fibonacci_memory(nth_nmb: int) -> int:
 
     def fib_cal(n):
         return n if n <= 1 else fib_cal(n - 1) + fib_cal(n - 2)
+
     num = fib_cal(nth_nmb)
-    new_memory = {nth_nmb: num}
-    memory.update(new_memory)
+    memory[nth_nmb] = num
     return num
 
 
@@ -121,13 +121,13 @@ def print_statistics(fib_details: dict, nth_value: int):
     main_header = "DURATION FOR EACH APPROACH WITHIN INTERVAL: 30-0"
     print(f'{line}\n{main_header :>60}{line}')
 
-    print(f"{'Seconds':^32}{'Milliseconds':^15}{'Microseconds':>13}{'Nanoseconds':>15}")
+    print(f"\t\t\t\t\t{'Seconds'}\t\t{'Milliseconds'}\t{'Microseconds'}\t{'Nanoseconds'}")
 
     for key, val in fib_details.items():                                       #for each key and value in fib_details;
                                                                                #retrieve duration from the tuple
         secs = (duration_format(fib_details[key][0], 'Seconds'))               #created in the decorator function, which
-        millisecs = (duration_format(fib_details[key][0], 'Milliseconds'))     #is on position 0 in values.
-        microsecs = (duration_format(fib_details[key][0], 'Microseconds'))
+        millisecs = (duration_format(fib_details[key][0], 'Milliseconds'))     #is on position 0 in values. Created
+        microsecs = (duration_format(fib_details[key][0], 'Microseconds'))     #variables to calculate and print them
         nanosecs = (duration_format(fib_details[key][0], 'Nanoseconds'))
 
 
@@ -136,8 +136,9 @@ def print_statistics(fib_details: dict, nth_value: int):
 
 def write_to_file(fib_details: dict):
     """Function to write information to file."""
-    pass  # TODO: Replace with implementation!
 
+    #retrieving sequences and values from fib_details and creating a file through context manager
+    #reversing the list of sequences and using zip() to match the lists
 
     for key, val in fib_details.items():
         with open(f"{RESOURCES}/{key.replace(' ', '_')}.txt", "w", encoding="utf-8") as file:
