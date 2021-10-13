@@ -66,37 +66,65 @@ def simulation_decorator(func):
 
 def parse_world_size_arg(_arg: str) -> tuple:
     """ Parse width and height from command argument. """
-    pass
 
-    #turn string into a list with width & height without x
+    #DO THE APLHA CHECK AS WELL
 
-    #width = [int(i) for i in _arg[0:2] if i.isdigit()]
-    #height = [int(i) for i in _arg[3:] if i.isdigit()]
-    #values = width, height
-
-    width = int(_arg[0:2])
-    height = int(_arg[3:])
-    size = width, height
-
-    #set default values
+    size = _arg.replace("x", " ")
+    size = size.split()
+    size = [int(i) for i in size]
 
     try:
-        if 2 < len(size) < 0:
+        if len(size) != 2:
             raise AssertionError("World size should contain width and height, separated by ‘x’. Ex: ‘80x40’")
-        if width or height < 1 and not int:
+        #if i.isdigit() for i in size
+        #    raise ValueError("Both width and height needs to have positive values above zero.")
+        if any(i<1 for i in size):
             raise ValueError("Both width and height needs to have positive values above zero.")
     except (AssertionError, ValueError) as e:
         print(e)
         print("Using default world size: 80x40")
+        size = (80, 40)
 
-    return size
+    width = int(size[0])
+    height = int(size[1])
 
+    return width, height
 
 def populate_world(_world_size: tuple, _seed_pattern: str = None) -> dict:
     """ Populate the world with cells and initial states. """
     pass
 
-    
+    population = {}
+
+    if _seed_pattern is not None:
+        cb.get_pattern(_seed_pattern)
+
+    rows = _world_size[0]
+    columns = _world_size[1]
+
+
+    for row, column in itertools.product(range(rows + 1), range(columns + 1)):
+        population[(row, column)] = ""
+        if row == 0:
+            population[(row, column)] = None
+            continue
+        if row == rows:
+            population[(row, column)] = None
+            continue
+        if column == 0:
+            population[(row, column)] = None
+            continue
+        if column == columns:
+            population[(row, column)] = None
+            continue
+        if _seed_pattern is not None:
+            
+
+    print(population)
+
+
+
+
 
 def calc_neighbour_positions(_cell_coord: tuple) -> list:
     """ Calculate neighbouring cell coordinates in all directions (cardinal + diagonal).
