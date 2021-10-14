@@ -90,6 +90,8 @@ def parse_world_size_arg(_arg: str) -> tuple:
 
     return width, height
 
+
+
 def populate_world(_world_size: tuple, _seed_pattern: str = None) -> dict:
     """ Populate the world with cells and initial states. """
     pass
@@ -97,14 +99,14 @@ def populate_world(_world_size: tuple, _seed_pattern: str = None) -> dict:
     population = {}
 
     if _seed_pattern is not None:
-        cb.get_pattern(_seed_pattern)
+        cb.get_pattern(_seed_pattern, _world_size)
 
     rows = _world_size[0]
     columns = _world_size[1]
 
 
     for row, column in itertools.product(range(rows + 1), range(columns + 1)):
-        population[(row, column)] = ""
+        population[(row, column)] = {}
         if row == 0:
             population[(row, column)] = None
             continue
@@ -117,12 +119,19 @@ def populate_world(_world_size: tuple, _seed_pattern: str = None) -> dict:
         if column == columns:
             population[(row, column)] = None
             continue
+
         if _seed_pattern is not None:
-            
+            cell_state = cb.get_pattern(_seed_pattern, _world_size)  #NOT SURE
+        else:
+            rand = random.randint(0, 20)
+            if rand <= 16:
+                cell_state = cb.STATE_DEAD
+            else:
+                cell_state = cb.STATE_ALIVE
 
     print(population)
 
-
+    #population[(row, column)]['state'] =
 
 
 
@@ -130,6 +139,13 @@ def calc_neighbour_positions(_cell_coord: tuple) -> list:
     """ Calculate neighbouring cell coordinates in all directions (cardinal + diagonal).
     Returns list of tuples. """
     pass
+
+    x = _cell_coord[0]
+    y = _cell_coord[1]
+
+    neighbours = [(x, y-1), (x-1, y-1), (x-1, y), (x-1, y+1), (x, y+1), (x+1, y+1), (x+1, y), (x+1, y-1)]
+
+    return neighbours
 
 
 def run_simulation(_generations: int, _population: dict, _world_size: tuple):
