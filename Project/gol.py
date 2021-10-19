@@ -76,6 +76,8 @@ def parse_world_size_arg(_arg: str) -> tuple:
     try:
         if len(size) != 2:
             raise AssertionError("World size should contain width and height, separated by ‘x’. Ex: ‘80x40’")
+        #if len(size) == 2:
+        #    size = [int(i) for i in size]
         #if (i.isdigit() for i in size):
         #    raise ValueError("Both width and height needs to have positive values above zero.")
         if any(i < 1 for i in size):
@@ -85,9 +87,8 @@ def parse_world_size_arg(_arg: str) -> tuple:
         print("Using default world size: 80x40")
         size = (80, 40)
 
-    #print(size)
-
     return size
+
 
 
 def populate_world(_world_size: tuple, _seed_pattern: str = None) -> dict:
@@ -135,9 +136,10 @@ def calc_neighbour_positions(_cell_coord: tuple) -> list:
     x = _cell_coord[0]
     y = _cell_coord[1]
 
-    nbrs = [(x, y-1), (x-1, y-1), (x-1, y), (x-1, y+1), (x, y+1), (x+1, y+1), (x+1, y), (x+1, y-1)]
+    neighbours = [(x, y-1), (x-1, y-1), (x-1, y), (x-1, y+1), (x, y+1), (x+1, y+1), (x+1, y), (x+1, y-1)]
 
-    return nbrs
+    return neighbours
+
 
 
 def run_simulation(_generations: int, _population: dict, _world_size: tuple):
@@ -146,7 +148,7 @@ def run_simulation(_generations: int, _population: dict, _world_size: tuple):
 
     for i in range(0, _generations):
         cb.clear_console()
-        update_world(_population, _world_size)             #and store new population states
+        update_world(_population, _world_size)
         sleep(0.2)
     
 
@@ -155,13 +157,34 @@ def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
     """ Represents a tick in the simulation. """
     pass
 
-    #next_gen = _cur_gen.copy()
+    next_gen = _cur_gen.copy()
 
-    #for (x, y) in _cur_gen:                      #line break? worldsize?
-    #    cb.progress(), cb.get_print_value()      #together with state constants?
-    #    count_alive_neighbours() -> next_gen     #calc next gen and store
-    #return next_gen
+    for (x, y) in _cur_gen:
+        print()
+        state = _cur_gen[(x, y)]['state']
+        status = cb.get_print_value(state)
+        cb.progress(status)
 
+        neighbours = calc_neighbour_positions((x, y))
+
+        alive_cells = count_alive_neighbours(neighbours, _cur_gen)
+
+        if state is cb.STATE_ALIVE:
+            if alive_cells == 2 or 3:
+                next_state = cb.STATE_ALIVE
+                next_gen.update(next_state)
+            else:
+                next_state = cb.STATE_DEAD
+                next_gen.update(next_state)
+        elif state is cb.STATE_DEAD:
+            if alive_cells == 3:
+                next_state = cb.STATE_ALIVE
+                next_gen.update(next_state)
+            else:
+                next_state = cb.STATE_DEAD
+                next_gen.update(next_state)
+
+    return next_gen
 
 
 
@@ -169,14 +192,10 @@ def count_alive_neighbours(_neighbours: list, _cells: dict) -> int:
     """ Determine how many of the neighbouring cells are currently alive. """
     pass
 
-    living = []
+    living = 0
 
-    populate_world()
-
-    nbr = _cells['neighbour']
-
-    for nbr in _neighbours:
-        if nbr is not None and cb.STATE_ALIVE:
+    for (x, y) in _neighbours:
+        if (x, y) is not None and cb.STATE_ALIVE:
             living =+ 1
     return living
 
