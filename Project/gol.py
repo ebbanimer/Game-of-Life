@@ -150,41 +150,53 @@ def run_simulation(_generations: int, _population: dict, _world_size: tuple):
         cb.clear_console()
         update_world(_population, _world_size)
         sleep(0.2)
-    
+
 
 
 def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
     """ Represents a tick in the simulation. """
     pass
 
-    next_gen = _cur_gen.copy()
+    next_gen = {}
 
     for (x, y) in _cur_gen:
-        print()
-        state = _cur_gen[(x, y)]['state']
-        status = cb.get_print_value(state)
-        cb.progress(status)
+
+        # linebreak = width (x)
+        # while loop, linebreak once width is done
+
+        cell_state = _cur_gen[(x, y)]['state']
+
+        if _cur_gen[(x, y)] is None:
+            cell_state = cb.STATE_RIM
+            status = cb.get_print_value(cell_state)
+            cb.progress(status)
+            break
+        else:
+            status = cb.get_print_value(cell_state)
+            cb.progress(status)
 
         neighbours = calc_neighbour_positions((x, y))
 
         alive_cells = count_alive_neighbours(neighbours, _cur_gen)
 
-        if state is cb.STATE_ALIVE:
+        if cell_state is cb.STATE_ALIVE:
             if alive_cells == 2 or 3:
                 next_state = cb.STATE_ALIVE
-                next_gen.update(next_state)
+                next_gen[(x, y)]['state'] = next_state
             else:
                 next_state = cb.STATE_DEAD
-                next_gen.update(next_state)
-        elif state is cb.STATE_DEAD:
+                next_gen[(x, y)]['state'] = next_state
+        elif cell_state is cb.STATE_DEAD:
             if alive_cells == 3:
                 next_state = cb.STATE_ALIVE
-                next_gen.update(next_state)
+                next_gen[(x, y)]['state'] = next_state
             else:
                 next_state = cb.STATE_DEAD
-                next_gen.update(next_state)
+                next_gen[(x, y)]['state'] = next_state
 
     return next_gen
+
+
 
 
 
