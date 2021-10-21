@@ -67,28 +67,29 @@ def simulation_decorator(func):
 def parse_world_size_arg(_arg: str) -> tuple:
     """ Parse width and height from command argument. """
 
-    #DO THE APLHA CHECK AS WELL
-
     size = _arg.replace("x", " ")
     size = size.split()
-    size = [int(i) for i in size]
+    size = tuple([int(i) for i in size])
 
     try:
         if len(size) != 2:
             raise AssertionError("World size should contain width and height, separated by ‘x’. Ex: ‘80x40’")
+
         #if len(size) == 2:
-        #    size = [int(i) for i in size]
-        #if (i.isdigit() for i in size):
-        #    raise ValueError("Both width and height needs to have positive values above zero.")
+        #    try:
+        #        size = tuple([int(i) for i in size])
+        #    except AssertionError:
+        #        print("World size should contain width and height, separated by ‘x’. Ex: ‘80x40’")
+
         if any(i < 1 for i in size):
             raise ValueError("Both width and height needs to have positive values above zero.")
+
     except (AssertionError, ValueError) as e:
         print(e)
         print("Using default world size: 80x40")
         size = (80, 40)
 
     return size
-
 
 
 def populate_world(_world_size: tuple, _seed_pattern: str = None) -> dict:
@@ -128,7 +129,6 @@ def populate_world(_world_size: tuple, _seed_pattern: str = None) -> dict:
     return population
 
 
-
 def calc_neighbour_positions(_cell_coord: tuple) -> list:
     """ Calculate neighbouring cell coordinates in all directions (cardinal + diagonal).
     Returns list of tuples. """
@@ -141,7 +141,6 @@ def calc_neighbour_positions(_cell_coord: tuple) -> list:
     return neighbours
 
 
-
 def run_simulation(_generations: int, _population: dict, _world_size: tuple):
     """ Runs simulation for specified amount of generations. """
     pass
@@ -152,32 +151,36 @@ def run_simulation(_generations: int, _population: dict, _world_size: tuple):
         sleep(0.2)
 
 
-
 def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
     """ Represents a tick in the simulation. """
     pass
 
-    next_gen = {}
+    #next_gen = {}
 
-    for (x, y) in _cur_gen:
+    for i, (x, y) in enumerate(_cur_gen):
 
-        # linebreak = width (x)
-        # while loop, linebreak once width is done
-
-        cell_state = _cur_gen[(x, y)]['state']
+        width = _world_size[0] - 1
 
         if _cur_gen[(x, y)] is None:
             cell_state = cb.STATE_RIM
             status = cb.get_print_value(cell_state)
             cb.progress(status)
-            break
+            if i % width == 0:
+                cb.progress('\n')
+                # break
         else:
+            cell_state = _cur_gen[(x, y)]['state']
             status = cb.get_print_value(cell_state)
             cb.progress(status)
 
+
+        '''
+    
         neighbours = calc_neighbour_positions((x, y))
 
         alive_cells = count_alive_neighbours(neighbours, _cur_gen)
+
+        cell_state = _cur_gen[(x, y)]['state']
 
         if cell_state is cb.STATE_ALIVE:
             if alive_cells == 2 or 3:
@@ -193,11 +196,9 @@ def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
             else:
                 next_state = cb.STATE_DEAD
                 next_gen[(x, y)]['state'] = next_state
+                '''
 
-    return next_gen
-
-
-
+    #return next_gen
 
 
 def count_alive_neighbours(_neighbours: list, _cells: dict) -> int:
@@ -210,6 +211,8 @@ def count_alive_neighbours(_neighbours: list, _cells: dict) -> int:
         if (x, y) is not None and cb.STATE_ALIVE:
             living =+ 1
     return living
+    
+
 
 
 def main():
