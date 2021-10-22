@@ -75,7 +75,7 @@ def parse_world_size_arg(_arg: str) -> tuple:
         if len(size) != 2:
             raise AssertionError("World size should contain width and height, separated by ‘x’. Ex: ‘80x40’")
 
-        #if len(size) == 2:
+        # if len(size) == 2:
         #    try:
         #        size = tuple([int(i) for i in size])
         #    except AssertionError:
@@ -97,19 +97,23 @@ def populate_world(_world_size: tuple, _seed_pattern: str = None) -> dict:
 
     population = {}
 
+    # If _seed_pattern contains a value, call get_pattern function in code_base
     if _seed_pattern is not None:
         pattern = cb.get_pattern(_seed_pattern, _world_size)
 
     rows = _world_size[0]
     columns = _world_size[1]
 
+    # For each coordinate in rows and columns create an inner dictionary for each cell with values.
     for x, y in itertools.product(range(rows + 1), range(columns + 1)):
         cell = {}
 
+        # If rim-cell, set value to None
         if x == 0 or x == rows or y == 0 or y == columns:
             population[(x, y)] = None
             continue
 
+        # Determine cell_state for alive and dead cells, either by randomization or based on _seed_pattern.
         if _seed_pattern is not None:
             if (x, y) in pattern:
                 cell_state = cb.STATE_ALIVE
@@ -122,6 +126,7 @@ def populate_world(_world_size: tuple, _seed_pattern: str = None) -> dict:
             else:
                 cell_state = cb.STATE_ALIVE
 
+        # Map values to dictionary and calculate neighbours by passing the coordinates to calc_ function.
         cell['state'] = cell_state
         cell['neighbours'] = calc_neighbour_positions((x, y))
         population[(x, y)] = cell
@@ -133,18 +138,21 @@ def calc_neighbour_positions(_cell_coord: tuple) -> list:
     """ Calculate neighbouring cell coordinates in all directions (cardinal + diagonal).
     Returns list of tuples. """
 
+    # Split the tuple into coordinates, and calculate neighbours by adding or subtracting values to change position.
+
     x = _cell_coord[0]
     y = _cell_coord[1]
 
-    neighbours = [(x, y-1), (x-1, y-1), (x-1, y), (x-1, y+1), (x, y+1), (x+1, y+1), (x+1, y), (x+1, y-1)]
+    neighbours = [(x, y - 1), (x - 1, y - 1), (x - 1, y), (x - 1, y + 1), (x, y + 1), (x + 1, y + 1), (x + 1, y),
+                  (x + 1, y - 1)]
 
     return neighbours
 
 
 def run_simulation(_generations: int, _population: dict, _world_size: tuple):
     """ Runs simulation for specified amount of generations. """
-    pass
 
+    # For each iteration through given generations, clear the console and get new generation from update_world.
     for i in range(0, _generations):
         cb.clear_console()
         update_world(_population, _world_size)
@@ -155,9 +163,9 @@ def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
     """ Represents a tick in the simulation. """
     pass
 
-    #next_gen = {}
+    # next_gen = {}
 
-    for i, (x, y) in enumerate(_cur_gen):
+    for i, (x, y) in enumerate(_cur_gen, start=1):
 
         width = _world_size[0] - 1
 
@@ -174,7 +182,7 @@ def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
             cb.progress(status)
 
 
-        '''
+    '''
     
         neighbours = calc_neighbour_positions((x, y))
 
@@ -198,21 +206,20 @@ def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
                 next_gen[(x, y)]['state'] = next_state
                 '''
 
-    #return next_gen
+    # return next_gen
 
 
 def count_alive_neighbours(_neighbours: list, _cells: dict) -> int:
     """ Determine how many of the neighbouring cells are currently alive. """
-    pass
 
+    # Define living counter
     living = 0
 
+    # For each cell in neighbours, if cell is not rim-cell and is alive, increment living.
     for (x, y) in _neighbours:
         if (x, y) is not None and cb.STATE_ALIVE:
-            living =+ 1
+            living = + 1
     return living
-    
-
 
 
 def main():
