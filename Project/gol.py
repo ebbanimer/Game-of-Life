@@ -163,26 +163,26 @@ def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
     """ Represents a tick in the simulation. """
     pass
 
-    # next_gen = {}
+    #next_gen = {}
 
-    for i, (x, y) in enumerate(_cur_gen, start=1):
+    width = _world_size[1]
 
-        width = _world_size[0] - 1
+    for i, (x, y) in enumerate(_cur_gen, start=0):
 
         if _cur_gen[(x, y)] is None:
             cell_state = cb.STATE_RIM
             status = cb.get_print_value(cell_state)
             cb.progress(status)
-            if i % width == 0:
-                cb.progress('\n')
-                # break
         else:
             cell_state = _cur_gen[(x, y)]['state']
             status = cb.get_print_value(cell_state)
             cb.progress(status)
 
-
-    '''
+        if y == width:
+            cb.progress('\n')
+'''
+        if _cur_gen[(x, y)] is None:
+            break
     
         neighbours = calc_neighbour_positions((x, y))
 
@@ -204,9 +204,10 @@ def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
             else:
                 next_state = cb.STATE_DEAD
                 next_gen[(x, y)]['state'] = next_state
+                
                 '''
 
-    # return next_gen
+    #return next_gen
 
 
 def count_alive_neighbours(_neighbours: list, _cells: dict) -> int:
