@@ -99,17 +99,17 @@ def populate_world(_world_size: tuple, _seed_pattern: str = None) -> dict:
     columns = _world_size[1]
 
     # For each coordinate in rows and columns create an inner dictionary for each cell with values.
-    for x, y in itertools.product(range(rows), range(columns)):
+    for y, x in itertools.product(range(columns), range(rows)):
         cell = {}
 
         # If rim-cell, set value to None
-        if x == 0 or x == rows or y == 0 or y == columns:
+        if x == 0 or x == rows - 1 or y == 0 or y == columns - 1:
             population[(x, y)] = None
             continue
 
         # Determine cell_state for alive and dead cells, either by randomization or based on _seed_pattern.
         if _seed_pattern is not None:
-            if (x, y) in pattern:
+            if (y, x) in pattern:
                 cell_state = cb.STATE_ALIVE
             else:
                 cell_state = cb.STATE_DEAD
@@ -122,8 +122,8 @@ def populate_world(_world_size: tuple, _seed_pattern: str = None) -> dict:
 
         # Map values to dictionary and calculate neighbours by passing the coordinates to calc_ function.
         cell['state'] = cell_state
-        cell['neighbours'] = calc_neighbour_positions((x, y))
-        population[(x, y)] = cell
+        cell['neighbours'] = calc_neighbour_positions((y, x))
+        population[(y, x)] = cell
 
     return population
 
@@ -134,11 +134,11 @@ def calc_neighbour_positions(_cell_coord: tuple) -> list:
 
     # Split the tuple into coordinates, and calculate neighbours by adding or subtracting values to change position.
 
-    x = _cell_coord[0]
-    y = _cell_coord[1]
+    y = _cell_coord[0]
+    x = _cell_coord[1]
 
-    neighbours = [(x, y - 1), (x - 1, y - 1), (x - 1, y), (x - 1, y + 1), (x, y + 1), (x + 1, y + 1), (x + 1, y),
-                  (x + 1, y - 1)]
+    neighbours = [(y, x - 1), (y - 1, x - 1), (y - 1, x), (y - 1, x + 1), (y, x + 1), (y + 1, x + 1), (y + 1, x),
+                  (y + 1, x - 1)]
 
     return neighbours
 
@@ -158,31 +158,26 @@ def run_simulation(_generations: int, _population: dict, _world_size: tuple):
 def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
     """ Represents a tick in the simulation. """
 
-    # 20x10 is rectangular, but should be square. linebreak should be at 20, but it doesn't work. x and y should
-    # switch place at some point.
-
     next_gen = {}
     width = _world_size[0] - 1
     height = _world_size[1] - 1
 
-    for i, key in enumerate(_cur_gen, start=1):
+    for (y, x) in _cur_gen:
 
         coord = {}
 
-        # i jumps from 41-81. when y = 40 and x = 0, breaks
-
-        if _cur_gen[key] is None:
+        if _cur_gen[(y, x)] is None:
             cell_state = cb.STATE_RIM
             cb.progress(cb.get_print_value(cell_state))
-            if i % width == 0:
+            if y == width:
                 cb.progress('\n')
         else:
-            cell_state = _cur_gen[key]['state']
+            cell_state = _cur_gen[(y, x)]['state']
             cb.progress(cb.get_print_value(cell_state))
 
-            neighbours = calc_neighbour_positions(key)
+            neighbours = calc_neighbour_positions((y, x))
             alive_cells = count_alive_neighbours(neighbours, _cur_gen)
-            cell_state = _cur_gen[key]['state']
+            cell_state = _cur_gen[(y, x)]['state']
             if cell_state is cb.STATE_ALIVE:
                 if alive_cells == 2 or 3:
                     coord['state'] = cb.STATE_ALIVE
@@ -195,10 +190,9 @@ def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
                     coord['state'] = cb.STATE_DEAD
 
             coord['neighbours'] = neighbours
-            next_gen[key] = coord
+            next_gen[(y, x)] = coord
 
     return next_gen
-
 
 
 def count_alive_neighbours(_neighbours: list, _cells: dict) -> int:
@@ -208,8 +202,8 @@ def count_alive_neighbours(_neighbours: list, _cells: dict) -> int:
     living = 0
 
     # For each cell in neighbours, if cell is not rim-cell and is alive, increment living.
-    for (x, y) in _neighbours:
-        if (x, y) is not None and cb.STATE_ALIVE:
+    for (y, x) in _neighbours:
+        if (y, x) is not None and cb.STATE_ALIVE:
             living = + 1
     return living
 
