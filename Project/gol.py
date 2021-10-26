@@ -69,18 +69,12 @@ def parse_world_size_arg(_arg: str) -> tuple:
 
     size = _arg.replace("x", " ")
     size = size.split()
-    size = tuple([int(i) for i in size])
 
     try:
-        if len(size) != 2:
+        if len(size) == 2:
+            size = tuple([int(i) for i in size])
+        else:
             raise AssertionError("World size should contain width and height, separated by ‘x’. Ex: ‘80x40’")
-
-        # if len(size) == 2:
-        #    try:
-        #        size = tuple([int(i) for i in size])
-        #    except AssertionError:
-        #        print("World size should contain width and height, separated by ‘x’. Ex: ‘80x40’")
-
         if any(i < 1 for i in size):
             raise ValueError("Both width and height needs to have positive values above zero.")
 
@@ -153,67 +147,68 @@ def run_simulation(_generations: int, _population: dict, _world_size: tuple):
     """ Runs simulation for specified amount of generations. """
 
     # For each iteration through given generations, clear the console and get new generation from update_world.
+
     for i in range(0, _generations):
         cb.clear_console()
-        update_world(_population, _world_size)
+        # Storing the new population in the return value from update_world
+        _population = update_world(_population, _world_size)
         sleep(0.2)
 
 
 def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
     """ Represents a tick in the simulation. """
-    pass
 
-    #next_gen = {}
+    next_gen = {}
+    width = _world_size[0]
+    height = _world_size[1]
 
-    width = _world_size[1]
+    # 20x10 is rectangular, but should be square. linebreak should be at 20, but it doesn't work. x and y should
+    # switch place at some point.
 
-    for i, (x, y) in enumerate(_cur_gen, start=0):
+    for i, (x, y) in enumerate(_cur_gen):
 
         if _cur_gen[(x, y)] is None:
             cell_state = cb.STATE_RIM
-            status = cb.get_print_value(cell_state)
-            cb.progress(status)
         else:
             cell_state = _cur_gen[(x, y)]['state']
-            status = cb.get_print_value(cell_state)
-            cb.progress(status)
 
-        if y == width:
+        if i % width == 0:
             cb.progress('\n')
-'''
+
+        cb.progress(cb.get_print_value(cell_state))
+
+        '''
+        coord = {}
+
         if _cur_gen[(x, y)] is None:
-            break
-    
-        neighbours = calc_neighbour_positions((x, y))
-
-        alive_cells = count_alive_neighbours(neighbours, _cur_gen)
-
-        cell_state = _cur_gen[(x, y)]['state']
-
-        if cell_state is cb.STATE_ALIVE:
-            if alive_cells == 2 or 3:
-                next_state = cb.STATE_ALIVE
-                next_gen[(x, y)]['state'] = next_state
+            cell_state = cb.STATE_RIM
+        else:
+            neighbours = calc_neighbour_positions((x, y))
+            alive_cells = count_alive_neighbours(neighbours, _cur_gen)
+            cell_state = _cur_gen[(x, y)]['state']
+            if cell_state is cb.STATE_ALIVE:
+                if alive_cells == 2 or 3:
+                    coord['state'] = cb.STATE_ALIVE
+                else:
+                    coord['state'] = cb.STATE_DEAD
             else:
-                next_state = cb.STATE_DEAD
-                next_gen[(x, y)]['state'] = next_state
-        elif cell_state is cb.STATE_DEAD:
-            if alive_cells == 3:
-                next_state = cb.STATE_ALIVE
-                next_gen[(x, y)]['state'] = next_state
-            else:
-                next_state = cb.STATE_DEAD
-                next_gen[(x, y)]['state'] = next_state
-                
-                '''
+                if alive_cells == 3:
+                    coord['state'] = cb.STATE_ALIVE
+                else:
+                    coord['state'] = cb.STATE_DEAD
 
-    #return next_gen
+            coord['neighbours'] = neighbours
+            next_gen[(x, y)] = coord
+
+    return next_gen
+    '''
+
 
 
 def count_alive_neighbours(_neighbours: list, _cells: dict) -> int:
     """ Determine how many of the neighbouring cells are currently alive. """
 
-    # Define living counter
+    # Defining living counter
     living = 0
 
     # For each cell in neighbours, if cell is not rim-cell and is alive, increment living.
