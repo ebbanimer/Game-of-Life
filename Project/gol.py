@@ -67,17 +67,21 @@ def simulation_decorator(func):
 def parse_world_size_arg(_arg: str) -> tuple:
     """ Parse width and height from command argument. """
 
+    # Replace the x in the string and split the elements in order to validate them.
+
     size = _arg.replace("x", " ")
     size = size.split()
 
     try:
+        # If the string has two items, convert them to integers in a tuple. If not, raise error.
         if len(size) == 2:
             size = tuple([int(i) for i in size])
         else:
             raise AssertionError("World size should contain width and height, separated by ‘x’. Ex: ‘80x40’")
+        # If the input passed len(size) == 2 and converting to int, check if the int's are larger than 1.
         if any(i < 1 for i in size):
             raise ValueError("Both width and height needs to have positive values above zero.")
-
+    # Print errors if occurred and set size back to default values.
     except (AssertionError, ValueError) as e:
         print(e)
         print("Using default world size: 80x40")
@@ -107,7 +111,7 @@ def populate_world(_world_size: tuple, _seed_pattern: str = None) -> dict:
             population[(x, y)] = None
             continue
 
-        # Determine cell_state for alive and dead cells, either by randomization or based on _seed_pattern.
+        # Determine cell_state for alive & dead cells, either by randomization or based on _seed_pattern from codebase.
         if _seed_pattern is not None:
             if (y, x) in pattern:
                 cell_state = cb.STATE_ALIVE
@@ -159,25 +163,33 @@ def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
     """ Represents a tick in the simulation. """
 
     next_gen = {}
-    width = _world_size[0] - 1
-    height = _world_size[1] - 1
+    width = _world_size[0] - 1  # compensating for rimcell
 
     for (y, x) in _cur_gen:
 
-        coord = {}
+        coord = {}    # Inner dictionary for cell
 
+        # If the value for the cell is none, print rimcell.
         if _cur_gen[(y, x)] is None:
             cell_state = cb.STATE_RIM
             cb.progress(cb.get_print_value(cell_state))
+            # When y equals width, perform a linebreak.
             if y == width:
                 cb.progress('\n')
+            # Set value to none for next generation.
+            coord = None
+
+        # If not rimcell, determine cell-state and print in console.
         else:
             cell_state = _cur_gen[(y, x)]['state']
             cb.progress(cb.get_print_value(cell_state))
 
+            # Get neighbours from calc_neighbour_positions and passing them to count_alive_neighbours.
             neighbours = calc_neighbour_positions((y, x))
             alive_cells = count_alive_neighbours(neighbours, _cur_gen)
+            coord['neighbours'] = neighbours
             cell_state = _cur_gen[(y, x)]['state']
+            # Based on neighbour-cells and rules, determine next generation.
             if cell_state is cb.STATE_ALIVE:
                 if alive_cells == 2 or 3:
                     coord['state'] = cb.STATE_ALIVE
@@ -188,9 +200,9 @@ def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
                     coord['state'] = cb.STATE_ALIVE
                 else:
                     coord['state'] = cb.STATE_DEAD
+            # Map together values for coordinates into next_generation.
 
-            coord['neighbours'] = neighbours
-            next_gen[(y, x)] = coord
+        next_gen[(y, x)] = coord
 
     return next_gen
 
