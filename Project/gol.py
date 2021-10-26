@@ -99,7 +99,7 @@ def populate_world(_world_size: tuple, _seed_pattern: str = None) -> dict:
     columns = _world_size[1]
 
     # For each coordinate in rows and columns create an inner dictionary for each cell with values.
-    for x, y in itertools.product(range(rows + 1), range(columns + 1)):
+    for x, y in itertools.product(range(rows), range(columns)):
         cell = {}
 
         # If rim-cell, set value to None
@@ -158,34 +158,31 @@ def run_simulation(_generations: int, _population: dict, _world_size: tuple):
 def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
     """ Represents a tick in the simulation. """
 
-    next_gen = {}
-    width = _world_size[0]
-    height = _world_size[1]
-
     # 20x10 is rectangular, but should be square. linebreak should be at 20, but it doesn't work. x and y should
     # switch place at some point.
 
-    for i, (x, y) in enumerate(_cur_gen):
+    next_gen = {}
+    width = _world_size[0] - 1
+    height = _world_size[1] - 1
 
-        if _cur_gen[(x, y)] is None:
-            cell_state = cb.STATE_RIM
-        else:
-            cell_state = _cur_gen[(x, y)]['state']
+    for i, key in enumerate(_cur_gen, start=1):
 
-        if i % width == 0:
-            cb.progress('\n')
-
-        cb.progress(cb.get_print_value(cell_state))
-
-        '''
         coord = {}
 
-        if _cur_gen[(x, y)] is None:
+        # i jumps from 41-81. when y = 40 and x = 0, breaks
+
+        if _cur_gen[key] is None:
             cell_state = cb.STATE_RIM
+            cb.progress(cb.get_print_value(cell_state))
+            if i % width == 0:
+                cb.progress('\n')
         else:
-            neighbours = calc_neighbour_positions((x, y))
+            cell_state = _cur_gen[key]['state']
+            cb.progress(cb.get_print_value(cell_state))
+
+            neighbours = calc_neighbour_positions(key)
             alive_cells = count_alive_neighbours(neighbours, _cur_gen)
-            cell_state = _cur_gen[(x, y)]['state']
+            cell_state = _cur_gen[key]['state']
             if cell_state is cb.STATE_ALIVE:
                 if alive_cells == 2 or 3:
                     coord['state'] = cb.STATE_ALIVE
@@ -198,10 +195,9 @@ def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
                     coord['state'] = cb.STATE_DEAD
 
             coord['neighbours'] = neighbours
-            next_gen[(x, y)] = coord
+            next_gen[key] = coord
 
     return next_gen
-    '''
 
 
 
