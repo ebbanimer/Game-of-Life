@@ -107,7 +107,7 @@ def populate_world(_world_size: tuple, _seed_pattern: str = None) -> dict:
         cell = {}
 
         # If rim-cell, set value to None
-        if x == 0 or x == rows - 1 or y == 0 or y == columns - 1:
+        if y == 0 or y == columns - 1 or x == 0 or x == rows - 1:
             population[(x, y)] = None
             continue
 
@@ -127,7 +127,7 @@ def populate_world(_world_size: tuple, _seed_pattern: str = None) -> dict:
         # Map values to dictionary and calculate neighbours by passing the coordinates to calc_ function.
         cell['state'] = cell_state
         cell['neighbours'] = calc_neighbour_positions((y, x))
-        population[(y, x)] = cell
+        population[(x, y)] = cell
 
     return population
 
@@ -187,7 +187,6 @@ def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
             # Get neighbours from calc_neighbour_positions and passing them to count_alive_neighbours.
             neighbours = calc_neighbour_positions((y, x))
             alive_cells = count_alive_neighbours(neighbours, _cur_gen)
-            coord['neighbours'] = neighbours
             cell_state = _cur_gen[(y, x)]['state']
             # Based on neighbour-cells and rules, determine next generation.
             if cell_state is cb.STATE_ALIVE:
@@ -201,7 +200,7 @@ def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
                 else:
                     coord['state'] = cb.STATE_DEAD
             # Map together values for coordinates into next_generation.
-
+            # coord['neighbours'] = neighbours
         next_gen[(y, x)] = coord
 
     return next_gen
@@ -210,7 +209,7 @@ def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
 def count_alive_neighbours(_neighbours: list, _cells: dict) -> int:
     """ Determine how many of the neighbouring cells are currently alive. """
 
-    # Defining living counter
+    # Define living counter
     living = 0
 
     # For each cell in neighbours, if cell is not rim-cell and is alive, increment living.
