@@ -159,6 +159,18 @@ def run_simulation(_generations: int, _population: dict, _world_size: tuple):
         sleep(0.2)
 
 
+    '''
+    _population = update_world(_population, _world_size)
+
+    def run_sim():
+        cb.clear_console()
+        return _population if _nth_generation == 0 or < _nth_generation
+    sleep(0.2)
+
+    range(0, _nth_generation)
+    '''
+
+
 def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
     """ Represents a tick in the simulation. """
 
@@ -167,41 +179,36 @@ def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
 
     for (y, x) in _cur_gen:
 
-        coord = {}    # Inner dictionary for cell
+        coord = {}
 
-        # If the value for the cell is none, print rimcell.
+        # Print out in console
         if _cur_gen[(y, x)] is None:
-            cell_state = cb.STATE_RIM
-            cb.progress(cb.get_print_value(cell_state))
-            # When y equals width, perform a linebreak.
+            cb.progress(cb.get_print_value(cb.STATE_RIM))
             if x == width:
                 cb.progress('\n')
-            # Set value to none for next generation.
-            coord = None
-
-        # If not rimcell, determine cell-state and print in console.
+            next_gen[(y, x)] = None
+            continue
         else:
             cell_state = _cur_gen[(y, x)]['state']
             cb.progress(cb.get_print_value(cell_state))
 
-            # Get neighbours from calc_neighbour_positions and pass them to count_alive_neighbours.
-            neighbours = calc_neighbour_positions((y, x))
-            alive_cells = count_alive_neighbours(neighbours, _cur_gen)
-            # Based on alive neighbour-cells and  GoL rules, determine next generation.
-            cell_state = _cur_gen[(y, x)]['state']
-            if cell_state is cb.STATE_ALIVE:
-                if alive_cells == 2 or 3:
-                    coord['state'] = cb.STATE_ALIVE
+            neighbours = _cur_gen[(y, x)]['neighbours']
+            alive_neighbours = count_alive_neighbours(neighbours, _cur_gen)
+
+            if _cur_gen[(y, x)]['state'] == cb.STATE_ALIVE:
+                if alive_neighbours == 2 or 3:
+                    state = cb.STATE_ALIVE
                 else:
-                    coord['state'] = cb.STATE_DEAD
+                    state = cb.STATE_DEAD
             else:
-                if alive_cells == 3:
-                    coord['state'] = cb.STATE_ALIVE
+                if alive_neighbours == 3:
+                    state = cb.STATE_ALIVE
                 else:
-                    coord['state'] = cb.STATE_DEAD
-            # Map together values for coordinates into next_generation.
-            # coord['neighbours'] = neighbours
-        next_gen[(y, x)] = coord
+                    state = cb.STATE_DEAD
+
+            coord['state'] = state
+            coord['neighbours'] = calc_neighbour_positions((y, x))
+            next_gen[(y, x)] = coord
 
     return next_gen
 
@@ -209,13 +216,21 @@ def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
 def count_alive_neighbours(_neighbours: list, _cells: dict) -> int:
     """ Determine how many of the neighbouring cells are currently alive. """
 
+    # _neighbours and _cells must be used. _neighbours are the cells per se, and _cells are the entire dict with all
+    # cells with None, State and Neighbour.
+
     # Define living counter
     living = 0
 
-    # For each cell in neighbours, if cell is not rim-cell and is alive, increment living.
     for (y, x) in _neighbours:
-        if (y, x) is not None and cb.STATE_ALIVE:
-            living = + 1
+        rim_cell = _cells[(y, x)] is None
+        if rim_cell:
+            break
+
+        alive_cell = _cells[(y, x)]['state'] is cb.STATE_ALIVE
+        if alive_cell:
+            living = living + 1
+
     return living
 
 
