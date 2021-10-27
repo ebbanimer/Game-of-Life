@@ -108,7 +108,7 @@ def populate_world(_world_size: tuple, _seed_pattern: str = None) -> dict:
 
         # If rim-cell, set value to None
         if y == 0 or y == columns - 1 or x == 0 or x == rows - 1:
-            population[(x, y)] = None
+            population[(y, x)] = None
             continue
 
         # Determine cell_state for alive & dead cells, either by randomization or based on _seed_pattern from codebase.
@@ -127,7 +127,7 @@ def populate_world(_world_size: tuple, _seed_pattern: str = None) -> dict:
         # Map values to dictionary and calculate neighbours by passing the coordinates to calc_ function.
         cell['state'] = cell_state
         cell['neighbours'] = calc_neighbour_positions((y, x))
-        population[(x, y)] = cell
+        population[(y, x)] = cell
 
     return population
 
@@ -174,7 +174,7 @@ def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
             cell_state = cb.STATE_RIM
             cb.progress(cb.get_print_value(cell_state))
             # When y equals width, perform a linebreak.
-            if y == width:
+            if x == width:
                 cb.progress('\n')
             # Set value to none for next generation.
             coord = None
@@ -184,11 +184,11 @@ def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
             cell_state = _cur_gen[(y, x)]['state']
             cb.progress(cb.get_print_value(cell_state))
 
-            # Get neighbours from calc_neighbour_positions and passing them to count_alive_neighbours.
+            # Get neighbours from calc_neighbour_positions and pass them to count_alive_neighbours.
             neighbours = calc_neighbour_positions((y, x))
             alive_cells = count_alive_neighbours(neighbours, _cur_gen)
+            # Based on alive neighbour-cells and  GoL rules, determine next generation.
             cell_state = _cur_gen[(y, x)]['state']
-            # Based on neighbour-cells and rules, determine next generation.
             if cell_state is cb.STATE_ALIVE:
                 if alive_cells == 2 or 3:
                     coord['state'] = cb.STATE_ALIVE
