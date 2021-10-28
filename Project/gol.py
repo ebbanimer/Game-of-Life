@@ -49,6 +49,23 @@ def load_seed_from_file(_file_name: str) -> tuple:
     """ Load population seed from file. Returns tuple: population (dict) and world_size (tuple). """
     pass
 
+    # format file name that is passed from argument. if .json is missing, make sure to add it
+
+    if '.json' not in _file_name:
+        seed_file = f'{_file_name}.json'
+    else:
+        seed_file = _file_name
+    file_path = RESOURCES / seed_file
+
+    with open(file_path, 'r') as file:
+        seeds = json.load(file)
+
+    # tuple not existing in neighbours. key is a string and not a tuple in json dict.
+    # tuple(coord) = dict["population"]
+    #
+
+
+
 
 def create_logger() -> logging.Logger:
     """ Creates a logging object to be used for reports. """
@@ -102,7 +119,9 @@ def populate_world(_world_size: tuple, _seed_pattern: str = None) -> dict:
     rows = _world_size[0]
     columns = _world_size[1]
 
-    # For each coordinate in rows and columns create an inner dictionary for each cell with values.
+    # For each coordinate in rows and columns create an inner dictionary for each cell with values. The coordinates are
+    # in format y, x instead of x, y. In code_base the coordinates are [1], [0] instead of [0], [1] - hence my
+    # decision to do the assignment in same format.
     for y, x in itertools.product(range(columns), range(rows)):
         cell = {}
 
