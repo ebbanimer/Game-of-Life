@@ -33,7 +33,7 @@ from pathlib import Path
 from ast import literal_eval
 from time import sleep
 
-import Project.code_base as cb
+import code_base as cb
 
 __version__ = '1.0'
 __desc__ = "A simplified implementation of Conway's Game of Life."
@@ -47,24 +47,35 @@ RESOURCES = Path(__file__).parent / "../_Resources/"
 
 def load_seed_from_file(_file_name: str) -> tuple:
     """ Load population seed from file. Returns tuple: population (dict) and world_size (tuple). """
-    pass
-
-    # format file name that is passed from argument. if .json is missing, make sure to add it
 
     if '.json' not in _file_name:
         seed_file = f'{_file_name}.json'
     else:
         seed_file = _file_name
+
     file_path = RESOURCES / seed_file
 
     with open(file_path, 'r') as file:
         seeds = json.load(file)
 
-    # tuple not existing in neighbours. key is a string and not a tuple in json dict.
-    # tuple(coord) = dict["population"]
-    #
+    pop = {}
 
+    for key in seeds["population"]:
+        cell = literal_eval(key)
+        if seeds["population"][key] is None:
+            pop[cell] = None
+            continue
 
+        status = seeds["population"][key]["state"]    # works
+        pop[cell]["state"] = status                   # skips - KeyError: (1, 1)
+
+        nbrs = seeds["population"][key]["neighbours"] # works
+        neighbours = [tuple(nbr) for nbr in nbrs]     # works
+        pop[cell]["neighbours"] = neighbours          # skips
+
+    world_size = tuple(seeds["world_size"])
+
+    return pop, world_size
 
 
 def create_logger() -> logging.Logger:
