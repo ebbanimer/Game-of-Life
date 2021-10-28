@@ -147,70 +147,72 @@ def calc_neighbour_positions(_cell_coord: tuple) -> list:
     return neighbours
 
 
-def run_simulation(_generations: int, _population: dict, _world_size: tuple):
+def run_simulation(_nth_generation: int, _population: dict, _world_size: tuple):
     """ Runs simulation for specified amount of generations. """
 
-    # For each iteration through given generations, clear the console and get new generation from update_world.
+    # If generation is 0, return empty space.
+    if _nth_generation == 0:
+        return None
 
-    for i in range(0, _generations):
-        cb.clear_console()
-        # Storing the new population in the return value from update_world
-        _population = update_world(_population, _world_size)
-        sleep(0.2)
-
-    '''
-    def run_sim(_population):
-        cb.clear_console()
-        _population = update_world(_population, _world_size)
-        sleep(0.2)
-        return _population if _nth_generation <= _nth_generation
-    return run_sim(_nth_generation)
-
-    range(0, _nth_generation)
-    '''
+    # Clear console and call population by passing through arguments to update_world and store the new generation.
+    cb.clear_console()
+    _population = update_world(_population, _world_size)
+    sleep(0.2)
+    # If it is only one generation, return initial population.
+    if _nth_generation == 1:
+        return _population
+    # If there are more generations, continue calling run_simulation until _nth_generation is 0.
+    else:
+        return run_simulation(_nth_generation - 1, _population, _world_size)
 
 
 def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
     """ Represents a tick in the simulation. """
 
-    # Alive cell don't become dead when livingcounter says so.
-
+    # Create a new empty dictionary to store the next generation.
     next_gen = {}
-    width = _world_size[0] - 1  # compensating for rimcell
+    width = _world_size[0] - 1  # Width is needed for linebreak. -1 for compensating for rim-cell.
 
     for (y, x) in _cur_gen:
 
+        # Create an inner dictionary for new values for next_gen
         coord = {}
 
-        # Print out in console
+        # Print out in console by calling functions in codebase.
         if _cur_gen[(y, x)] is None:
             cb.progress(cb.get_print_value(cb.STATE_RIM))
+            # Break when the x is equal to width in order to achieve the desired shape of world grid.
             if x == width:
                 cb.progress('\n')
+            # Rim-cells should remain the same for next generation. Set value to none.
             next_gen[(y, x)] = None
             continue
         else:
             cell_state = _cur_gen[(y, x)]['state']
             cb.progress(cb.get_print_value(cell_state))
-
+            # Retrieve neighbours and pass them to count_alive_neighbours in order to determine alive cells.
             neighbours = _cur_gen[(y, x)]['neighbours']
             alive_neighbours = count_alive_neighbours(neighbours, _cur_gen)
 
+            # If the current cell is alive and if it has 2 or 3 alive neighbours,
+            # it will remain alive in next generation. If it has more or less alive neighbours, it will die. Map the
+            # states to coord.
             if _cur_gen[(y, x)]['state'] == cb.STATE_ALIVE:
                 if alive_neighbours == 2:
                     coord['state'] = cb.STATE_ALIVE
                 elif alive_neighbours == 3:
-                    coord['state'] = cb.STATE_ALIVE      
-                elif alive_neighbours == 0 or 1:
+                    coord['state'] = cb.STATE_ALIVE
+                else:
                     coord['state'] = cb.STATE_DEAD
-                elif alive_neighbours > 2:
-                    coord['state'] = cb.STATE_DEAD
+            # If the current cell is dead but it has 3 alive neighbours, it will be alive in next generation. Else,
+            # it remain dead. Map values to coord.
             elif _cur_gen[(y, x)]['state'] == cb.STATE_DEAD:
                 if alive_neighbours == 3:
                     coord['state'] = cb.STATE_ALIVE
                 else:
                     coord['state'] = cb.STATE_DEAD
 
+            # Map neighbours to coord, and then map coord to the next_generation.
             coord['neighbours'] = calc_neighbour_positions((y, x))
             next_gen[(y, x)] = coord
 
@@ -223,6 +225,9 @@ def count_alive_neighbours(_neighbours: list, _cells: dict) -> int:
     # Define living counter
     living = 0
 
+    # The values of neighbours can be retrieved in _cells. If value is none, it is a rim-cell and should not
+    # be considered in calculation of alive neighbours, hence continue. However, if the state for neighbour is alive,
+    # increment living counter and return it.
     for (y, x) in _neighbours:
         rim_cell = _cells[(y, x)] is None
         if rim_cell:
