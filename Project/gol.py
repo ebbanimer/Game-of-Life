@@ -48,13 +48,14 @@ RESOURCES = Path(__file__).parent / "../_Resources/"
 def load_seed_from_file(_file_name: str) -> tuple:
     """ Load population seed from file. Returns tuple: population (dict) and world_size (tuple). """
 
+    # If .json suffix is not in provided filename, add it via f'string.
     if '.json' not in _file_name:
         seed_file = f'{_file_name}.json'
     else:
         seed_file = _file_name
 
+    #  Create a filepath
     file_path = RESOURCES / seed_file
-
     with open(file_path, 'r') as file:
         seeds = json.load(file)
 
@@ -62,16 +63,18 @@ def load_seed_from_file(_file_name: str) -> tuple:
 
     for key in seeds["population"]:
         cell = literal_eval(key)
+        pop[cell] = {}
+
         if seeds["population"][key] is None:
             pop[cell] = None
             continue
 
-        status = seeds["population"][key]["state"]    # works
-        pop[cell]["state"] = status                   # skips - KeyError: (1, 1)
+        status = seeds["population"][key]["state"]
+        pop[cell]["state"] = status
 
-        nbrs = seeds["population"][key]["neighbours"] # works
-        neighbours = [tuple(nbr) for nbr in nbrs]     # works
-        pop[cell]["neighbours"] = neighbours          # skips
+        nbrs = seeds["population"][key]["neighbours"]
+        neighbours = [tuple(nbr) for nbr in nbrs]
+        pop[cell]["neighbours"] = neighbours
 
     world_size = tuple(seeds["world_size"])
 
