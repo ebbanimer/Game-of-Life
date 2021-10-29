@@ -87,7 +87,7 @@ def load_seed_from_file(_file_name: str) -> tuple:
     # The world size in seeds dictionary is in a 'list' format, and needs to be converted to tuple.
     world_size = tuple(seeds["world_size"])
 
-    # Dictionary and world_size are now converted to correct format. Return the items as tuple. 
+    # Dictionary and world_size are now converted to correct format. Return the items as tuple.
     return pop, world_size
 
 
@@ -109,7 +109,6 @@ def parse_world_size_arg(_arg: str) -> tuple:
     """ Parse width and height from command argument. """
 
     # Replace the x in the string and split the elements in order to validate them.
-
     size = _arg.replace("x", " ")
     size = size.split()
 
@@ -119,9 +118,11 @@ def parse_world_size_arg(_arg: str) -> tuple:
             size = tuple([int(i) for i in size])
         else:
             raise AssertionError("World size should contain width and height, separated by ‘x’. Ex: ‘80x40’")
+
         # If the input passed len(size) == 2 and converting to int, check if the int's are larger than 1.
         if any(i < 1 for i in size):
             raise ValueError("Both width and height needs to have positive values above zero.")
+
     # Print errors if occurred and set size back to default values.
     except (AssertionError, ValueError) as e:
         print(e)
@@ -180,7 +181,6 @@ def calc_neighbour_positions(_cell_coord: tuple) -> list:
     Returns list of tuples. """
 
     # Split the tuple into coordinates, and calculate neighbours by adding or subtracting values to change position.
-
     y = _cell_coord[0]
     x = _cell_coord[1]
 
@@ -201,9 +201,11 @@ def run_simulation(_nth_generation: int, _population: dict, _world_size: tuple):
     cb.clear_console()
     _population = update_world(_population, _world_size)
     sleep(0.2)
+
     # If it is only one generation, return initial population.
     if _nth_generation == 1:
         return _population
+
     # If there are more generations, continue calling run_simulation until _nth_generation is 0.
     else:
         return run_simulation(_nth_generation - 1, _population, _world_size)
@@ -224,15 +226,18 @@ def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
         # Print out in console by calling functions in codebase.
         if _cur_gen[(y, x)] is None:
             cb.progress(cb.get_print_value(cb.STATE_RIM))
+
             # Break when the x is equal to width in order to achieve the desired shape of world grid.
             if x == width:
                 cb.progress('\n')
+
             # Rim-cells should remain the same for next generation. Set value to none.
             next_gen[(y, x)] = None
             continue
         else:
             cell_state = _cur_gen[(y, x)]['state']
             cb.progress(cb.get_print_value(cell_state))
+
             # Retrieve neighbours and pass them to count_alive_neighbours in order to determine alive cells.
             neighbours = _cur_gen[(y, x)]['neighbours']
             alive_neighbours = count_alive_neighbours(neighbours, _cur_gen)
@@ -247,6 +252,7 @@ def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
                     coord['state'] = cb.STATE_ALIVE
                 else:
                     coord['state'] = cb.STATE_DEAD
+
             # If the current cell is dead but it has 3 alive neighbours, it will be alive in next generation. Else,
             # it remain dead. Map values to coord.
             elif _cur_gen[(y, x)]['state'] == cb.STATE_DEAD:
