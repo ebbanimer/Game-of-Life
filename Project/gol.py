@@ -54,30 +54,40 @@ def load_seed_from_file(_file_name: str) -> tuple:
     else:
         seed_file = _file_name
 
-    #  Create a filepath
+    #  Create a filepath and open it in readmode. Load the json content and name the dictionary to seeds.
     file_path = RESOURCES / seed_file
     with open(file_path, 'r') as file:
         seeds = json.load(file)
 
+    # Create an empty dictionary to store the population from seeds.
     pop = {}
 
+    # In seeds dictionary, the coordinates in "population" are tuples inside a string. For each coordinate,
+    # mask out the tuple from the string and name the tuple-coordinate to cell. Map the coordinate to population
+    # dictionary.
     for key in seeds["population"]:
         cell = literal_eval(key)
         pop[cell] = {}
 
+        # If the original coordinates are rimcells, add the rimcells to new dictionary.
         if seeds["population"][key] is None:
             pop[cell] = None
             continue
 
+        # The state for the coordinate in original dictionary shall be the same in pop dictionary.
         status = seeds["population"][key]["state"]
         pop[cell]["state"] = status
 
+        # The neighbours in original dictionary shall be the same in pop dictionary. The neighbours are in
+        # 'list' format, so they need to be converted to tuples through a loop.
         nbrs = seeds["population"][key]["neighbours"]
         neighbours = [tuple(nbr) for nbr in nbrs]
         pop[cell]["neighbours"] = neighbours
 
+    # The world size in seeds dictionary is in a 'list' format, and needs to be converted to tuple.
     world_size = tuple(seeds["world_size"])
 
+    # Dictionary and world_size are now converted to correct format. Return the items as tuple. 
     return pop, world_size
 
 
