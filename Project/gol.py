@@ -54,7 +54,7 @@ def load_seed_from_file(_file_name: str) -> tuple:
     else:
         seed_file = _file_name
 
-    #  Create a filepath and open it in readmode. Load the json content and name the dictionary to seeds.
+    #  Create a filepath and open it in read-mode. Load the json content and name the containing dictionary to seeds.
     file_path = RESOURCES / seed_file
     with open(file_path, 'r') as file:
         seeds = json.load(file)
@@ -93,17 +93,56 @@ def load_seed_from_file(_file_name: str) -> tuple:
 
 def create_logger() -> logging.Logger:
     """ Creates a logging object to be used for reports. """
-    pass
+
+    logger = logging.getLogger('gol_logger')
+    logger.setLevel(logging.INFO)
+
+    log_file = RESOURCES / 'gol.log'
+    file_handler = logging.FileHandler(log_file, mode='w')
+    file_handler.setLevel(logging.INFO)
+    logger.addHandler(file_handler)
+
+    return logger
 
 
 def simulation_decorator(func):
     """ Function decorator, used to run full extent of simulation. """
     pass
 
+    # How do I access alive/dead cells?
+
+    def wrapper(_generations, _population, _world_size):
+
+        logger = create_logger()
+
+        width = _world_size[0]
+        height = _world_size[1]
+        world_grid = width * height
+        rim_cells = (width * 2) + (height * 2) - 4
+
+        for i in range(0, _generations):
+            cb.clear_console()
+            population = world_grid - rim_cells
+            alive_counter = 0
+            for (y, x) in _population:
+                if _population[(y, x)] is None:
+                    continue
+                alive_cells = _population[(y, x)]['state'] is cb.STATE_ALIVE
+                if alive_cells:
+                    alive_counter = alive_counter + 1
+            dead_cells = population - alive_counter
+            logger.info(f'GENERATION {i}\n\t\tPopulation: {population}\n\t\tAlive: {alive_counter}\n\t\tDead: {dead_cells}')
+            _population = func(_generations, _population, _world_size)
+            sleep(0.2)
+
+    return wrapper
+        
 
 # -----------------------------------------
 # BASE IMPLEMENTATIONS
 # -----------------------------------------
+
+
 
 def parse_world_size_arg(_arg: str) -> tuple:
     """ Parse width and height from command argument. """
@@ -144,8 +183,8 @@ def populate_world(_world_size: tuple, _seed_pattern: str = None) -> dict:
     rows = _world_size[0]
     columns = _world_size[1]
 
-    # For each coordinate in rows and columns create an inner dictionary for each cell with values. The coordinates are
-    # in format y, x instead of x, y. In code_base the coordinates are [1], [0] instead of [0], [1] - hence my
+    # For each coordinate in rows and columns, create an inner dictionary for each cell with values. The coordinates are
+    # in format y, x instead of x, y. In code_base the coordinates are ([1], [0]) instead of ([0], [1]) - hence my
     # decision to do the assignment in same format.
     for y, x in itertools.product(range(columns), range(rows)):
         cell = {}
@@ -190,9 +229,13 @@ def calc_neighbour_positions(_cell_coord: tuple) -> list:
     return neighbours
 
 
-def run_simulation(_nth_generation: int, _population: dict, _world_size: tuple):
+@simulation_decorator
+def run_simulation(_generations: int, _population: dict, _world_size: tuple):
     """ Runs simulation for specified amount of generations. """
 
+    return update_world(_population, _world_size)
+
+    '''
     # If generation is 0, return empty space.
     if _nth_generation == 0:
         return None
@@ -209,6 +252,8 @@ def run_simulation(_nth_generation: int, _population: dict, _world_size: tuple):
     # If there are more generations, continue calling run_simulation until _nth_generation is 0.
     else:
         return run_simulation(_nth_generation - 1, _population, _world_size)
+        
+    '''
 
 
 def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
@@ -220,7 +265,7 @@ def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
 
     for (y, x) in _cur_gen:
 
-        # Create an inner dictionary for new values for next_gen
+        # Create an inner dictionary for new values for next_gen.
         coord = {}
 
         # Print out in console by calling functions in codebase.
@@ -254,7 +299,7 @@ def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
                     coord['state'] = cb.STATE_DEAD
 
             # If the current cell is dead but it has 3 alive neighbours, it will be alive in next generation. Else,
-            # it remain dead. Map values to coord.
+            # it remains dead. Map values to coord.
             elif _cur_gen[(y, x)]['state'] == cb.STATE_DEAD:
                 if alive_neighbours == 3:
                     coord['state'] = cb.STATE_ALIVE
