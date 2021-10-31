@@ -94,9 +94,11 @@ def load_seed_from_file(_file_name: str) -> tuple:
 def create_logger() -> logging.Logger:
     """ Creates a logging object to be used for reports. """
 
+    # Get logger and name it to gol_logger. Set the logger level to info.
     logger = logging.getLogger('gol_logger')
     logger.setLevel(logging.INFO)
 
+    # Set ut the filepath and create a handlar in write mode. Add the handler to the logger.
     log_file = RESOURCES / 'gol.log'
     file_handler = logging.FileHandler(log_file, mode='w')
     file_handler.setLevel(logging.INFO)
@@ -107,22 +109,26 @@ def create_logger() -> logging.Logger:
 
 def simulation_decorator(func):
     """ Function decorator, used to run full extent of simulation. """
-    pass
 
-    # How do I access alive/dead cells?
-
+    # Create inner function - wrapper - to run the run_simulation, which has been decorated.
     def wrapper(_generations, _population, _world_size):
 
+        # Get the logger from create_logger()
         logger = create_logger()
 
+        # To calculate the population, state variables based on world_size tuple.
         width = _world_size[0]
         height = _world_size[1]
         world_grid = width * height
         rim_cells = (width * 2) + (height * 2) - 4
+        population = world_grid - rim_cells
 
+        # For each generation from zero to given generation, perform codeblock below.
         for i in range(0, _generations):
             cb.clear_console()
-            population = world_grid - rim_cells
+
+            # In order to calculate amount of living cells, define a counter. For each coordinate in _population,
+            # if it is a rimcell - continue. If it is a living cell, increment the counter.
             alive_counter = 0
             for (y, x) in _population:
                 if _population[(y, x)] is None:
@@ -130,8 +136,13 @@ def simulation_decorator(func):
                 alive_cells = _population[(y, x)]['state'] is cb.STATE_ALIVE
                 if alive_cells:
                     alive_counter = alive_counter + 1
+
+            # To determine dead cells, subtract alive cells from population.
+            # Print out information in the log file.
             dead_cells = population - alive_counter
             logger.info(f'GENERATION {i}\n\t\tPopulation: {population}\n\t\tAlive: {alive_counter}\n\t\tDead: {dead_cells}')
+
+            # Call decorated function and store returned dictionary for population.
             _population = func(_generations, _population, _world_size)
             sleep(0.2)
 
@@ -141,7 +152,6 @@ def simulation_decorator(func):
 # -----------------------------------------
 # BASE IMPLEMENTATIONS
 # -----------------------------------------
-
 
 
 def parse_world_size_arg(_arg: str) -> tuple:
@@ -234,26 +244,6 @@ def run_simulation(_generations: int, _population: dict, _world_size: tuple):
     """ Runs simulation for specified amount of generations. """
 
     return update_world(_population, _world_size)
-
-    '''
-    # If generation is 0, return empty space.
-    if _nth_generation == 0:
-        return None
-
-    # Clear console and call population by passing through arguments to update_world and store the new generation.
-    cb.clear_console()
-    _population = update_world(_population, _world_size)
-    sleep(0.2)
-
-    # If it is only one generation, return initial population.
-    if _nth_generation == 1:
-        return _population
-
-    # If there are more generations, continue calling run_simulation until _nth_generation is 0.
-    else:
-        return run_simulation(_nth_generation - 1, _population, _world_size)
-        
-    '''
 
 
 def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
