@@ -106,12 +106,13 @@ def simulation_decorator(func):
         for i in range(0, _generations):
             cb.clear_console()
 
-            # In order to calculate amount of living cells, define a counter. For each coordinate in _population,
-            # if it is a rimcell - continue. If it is a living cell, increment the counter.
+            # In order to calculate amount of living cells, define a counter for each state.
             alive_counter = 0
             elder_counter = 0
             prime_counter = 0
 
+            # For each coordinate in _population, if it is a rimcell - continue. If it is a living cell,
+            # increment the counter. If it is a elder or prime elder, should also be counted to a living cell.
             for (y, x) in _population:
                 if _population[(y, x)] is None:
                     continue
@@ -266,9 +267,9 @@ def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
             neighbours = _cur_gen[(y, x)]['neighbours']
             alive_neighbours = count_alive_neighbours(neighbours, _cur_gen)
 
-            # If the current cell is alive and if it has 2 or 3 alive neighbours,
-            # it will remain alive in next generation. If it has more or less alive neighbours, it will die. Map the
-            # states to coord.
+            # If the current cell is alive and if it has 2 or 3 alive neighbours, it will remain alive in next
+            # generation. Note that elder and prime elder are also considered. If it has more or less alive neighbours,
+            # it will die. Map the states to coord.
             if cell_state == cb.STATE_ALIVE:
                 if 2 <= alive_neighbours <= 3:
                     coord['state'] = cb.STATE_ALIVE
@@ -285,7 +286,7 @@ def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
                 else:
                     coord['state'] = cb.STATE_DEAD
 
-            # If the current cell is dead but it has 3 alive neighbours, it will be alive in next generation. Else,
+            # If the current cell is dead but has 3 alive neighbours, it will be alive in next generation. Else,
             # it remains dead. Map values to coord.
             else:
                 if alive_neighbours == 3:
@@ -293,6 +294,7 @@ def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
                 else:
                     coord['state'] = cb.STATE_DEAD
 
+            # Increment the age if the state is alive, elder or prime elder. If it is dead, reset age to 0.
             if coord['state'] == cb.STATE_ALIVE:
                 age = _cur_gen[(y, x)]['age'] + 1
             elif coord['state'] == cb.STATE_ELDER:
@@ -302,12 +304,13 @@ def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
             else:
                 age = 0
 
+            # If the age is between 5-11, it is elder. If above 11, it is prime elder.
             if 5 <= age < 11:
                 coord['state'] = cb.STATE_ELDER
             elif 11 <= age:
                 coord['state'] = cb.STATE_PRIME_ELDER
 
-            # Map neighbours to coord, and then map coord to the next_generation.
+            # Map neighbours and age to coord, and then map coord to the next_generation.
             coord['age'] = age
             coord['neighbours'] = calc_neighbour_positions((y, x))
             next_gen[(y, x)] = coord
@@ -323,7 +326,7 @@ def count_alive_neighbours(_neighbours: list, _cells: dict) -> int:
 
     # The values of neighbours can be retrieved in _cells. If value is none, it is a rim-cell and should not
     # be considered in calculation of alive neighbours, hence continue. However, if the state for neighbour is alive,
-    # increment living counter and return it.
+    # increment living counter and return it. Note that elder and prime elder are considered alive in calculation.
     for (y, x) in _neighbours:
         rim_cell = _cells[(y, x)] is None
         if rim_cell:
