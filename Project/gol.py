@@ -1,28 +1,5 @@
 #!/usr/bin/env python
-"""
-The universe of the Game of Life is an infinite two-dimensional orthogonal grid of square cells,
-each of which is in one of two possible states, alive or dead (populated or unpopulated).
-Every cell interacts with its eight neighbours, which are the cells that are horizontally,
-vertically, or diagonally adjacent.
 
-At each step in time, the following transitions occur:
-
-****************************************************************************************************
-   1. Any live cell with fewer than two live neighbours dies, as if caused by underpopulation.
-   2. Any live cell with two or three live neighbours lives on to the next generation.
-   3. Any live cell with more than three live neighbours dies, as if by overpopulation.
-   4. Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
-****************************************************************************************************
-
-The initial pattern constitutes the seed of the system.
-
-The first generation is created by applying the above rules simultaneously to every cell in the
-seed—births and deaths occur simultaneously, and the discrete moment at which this happens is
-sometimes called a tick. The rules continue to be applied repeatedly to create further generations.
-
-You run this script as a module:
-    python -m Project.gol.py
-"""
 
 import argparse
 import random
@@ -44,6 +21,7 @@ RESOURCES = Path(__file__).parent / "../_Resources/"
 # -----------------------------------------
 # IMPLEMENTATIONS FOR HIGHER GRADES, C - B
 # -----------------------------------------
+
 
 def load_seed_from_file(_file_name: str) -> tuple:
     """ Load population seed from file. Returns tuple: population (dict) and world_size (tuple). """
@@ -77,6 +55,7 @@ def load_seed_from_file(_file_name: str) -> tuple:
         # The state for the coordinate in original dictionary shall be the same in pop dictionary.
         status = seeds["population"][key]["state"]
         pop[cell]["state"] = status
+        pop[cell]['age'] = 0
 
         # The neighbours in original dictionary shall be the same in pop dictionary. The neighbours are in
         # 'list' format, so they need to be converted to tuples through a loop.
@@ -130,17 +109,26 @@ def simulation_decorator(func):
             # In order to calculate amount of living cells, define a counter. For each coordinate in _population,
             # if it is a rimcell - continue. If it is a living cell, increment the counter.
             alive_counter = 0
+            elder_counter = 0
+            prime_counter = 0
+
             for (y, x) in _population:
                 if _population[(y, x)] is None:
                     continue
-                alive_cells = _population[(y, x)]['state'] is cb.STATE_ALIVE
-                if alive_cells:
+                if _population[(y, x)]['state'] is cb.STATE_ALIVE:
+                    alive_counter = alive_counter + 1
+                elif _population[(y, x)]['state'] is cb.STATE_ELDER:
+                    elder_counter = elder_counter + 1
+                    alive_counter = alive_counter + 1
+                elif _population[(y, x)]['state'] is cb.STATE_PRIME_ELDER:
+                    prime_counter = prime_counter + 1
                     alive_counter = alive_counter + 1
 
             # To determine dead cells, subtract alive cells from population.
             # Print out information in the log file.
             dead_cells = population - alive_counter
-            logger.info(f'GENERATION {i}\n\t\tPopulation: {population}\n\t\tAlive: {alive_counter}\n\t\tDead: {dead_cells}')
+            logger.info(f'GENERATION {i}\n\t\tPopulation: {population}\n\t\tAlive: {alive_counter}'
+                        f'\n\t\tElder: {elder_counter}\n\t\tPrime elder: {prime_counter}\n\t\tDead: {dead_cells}')
 
             # Call decorated function and store returned dictionary for population.
             _population = func(_generations, _population, _world_size)
@@ -220,6 +208,7 @@ def populate_world(_world_size: tuple, _seed_pattern: str = None) -> dict:
         # Map values to dictionary and calculate neighbours by passing the coordinates to calc_ function.
         cell['state'] = cell_state
         cell['neighbours'] = calc_neighbour_positions((y, x))
+        cell['age'] = 0
         population[(y, x)] = cell
 
     return population
@@ -280,23 +269,46 @@ def update_world(_cur_gen: dict, _world_size: tuple) -> dict:
             # If the current cell is alive and if it has 2 or 3 alive neighbours,
             # it will remain alive in next generation. If it has more or less alive neighbours, it will die. Map the
             # states to coord.
-            if _cur_gen[(y, x)]['state'] == cb.STATE_ALIVE:
-                if alive_neighbours == 2:
+            if cell_state == cb.STATE_ALIVE:
+                if 2 <= alive_neighbours <= 3:
                     coord['state'] = cb.STATE_ALIVE
-                elif alive_neighbours == 3:
-                    coord['state'] = cb.STATE_ALIVE
+                else:
+                    coord['state'] = cb.STATE_DEAD
+            elif cell_state == cb.STATE_ELDER:
+                if 2 <= alive_neighbours <= 3:
+                    coord['state'] = cb.STATE_ELDER
+                else:
+                    coord['state'] = cb.STATE_DEAD
+            elif cell_state == cb.STATE_PRIME_ELDER:
+                if 2 <= alive_neighbours <= 3:
+                    coord['state'] = cb.STATE_PRIME_ELDER
                 else:
                     coord['state'] = cb.STATE_DEAD
 
             # If the current cell is dead but it has 3 alive neighbours, it will be alive in next generation. Else,
             # it remains dead. Map values to coord.
-            elif _cur_gen[(y, x)]['state'] == cb.STATE_DEAD:
+            else:
                 if alive_neighbours == 3:
                     coord['state'] = cb.STATE_ALIVE
                 else:
                     coord['state'] = cb.STATE_DEAD
 
+            if coord['state'] == cb.STATE_ALIVE:
+                age = _cur_gen[(y, x)]['age'] + 1
+            elif coord['state'] == cb.STATE_ELDER:
+                age = _cur_gen[(y, x)]['age'] + 1
+            elif coord['state'] == cb.STATE_PRIME_ELDER:
+                age = _cur_gen[(y, x)]['age'] + 1
+            else:
+                age = 0
+
+            if 5 <= age < 11:
+                coord['state'] = cb.STATE_ELDER
+            elif 11 <= age:
+                coord['state'] = cb.STATE_PRIME_ELDER
+
             # Map neighbours to coord, and then map coord to the next_generation.
+            coord['age'] = age
             coord['neighbours'] = calc_neighbour_positions((y, x))
             next_gen[(y, x)] = coord
 
@@ -317,8 +329,13 @@ def count_alive_neighbours(_neighbours: list, _cells: dict) -> int:
         if rim_cell:
             continue
 
-        alive_cell = _cells[(y, x)]['state'] is cb.STATE_ALIVE
-        if alive_cell:
+        cell_status = _cells[(y, x)]['state']
+
+        if cell_status is cb.STATE_ALIVE:
+            living = living + 1
+        elif cell_status is cb.STATE_ELDER:
+            living = living + 1
+        elif cell_status is cb.STATE_PRIME_ELDER:
             living = living + 1
 
     return living
@@ -352,3 +369,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
