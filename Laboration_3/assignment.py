@@ -29,14 +29,10 @@ RESOURCES = Path(__file__).parent / "../_Resources/"
 def create_logger() -> logging.Logger:
     """Create and return logger object."""
 
-    file_path = RESOURCES / 'ass3_log_conf.json'                   #setting up filepath to json file to read and
-    with open(file_path, 'r', encoding='utf-8') as file_hand:      #to create the logger
-        config = json.load(file_hand)
-        logging.config.dictConfig(config)
-
-    LOGGER = logging.getLogger('ass_3_logger')
-
-    return LOGGER
+    file_path = RESOURCES / 'ass3_log_conf.json'                   # Setting up filepath to json file to read and
+    with open(file_path, 'r', encoding='utf-8') as file_hand:      # to create the logger
+        logging.config.dictConfig(json.load(file_hand))
+        return logging.getLogger('ass_3_logger')
 
 
 def measurements_decorator(func):
@@ -44,22 +40,21 @@ def measurements_decorator(func):
     @wraps(func)
     def wrapper(nth_nmb: int) -> tuple:
 
-        nth_list = []                                       #creating an empty list to store values
+        nth_list = []                                       # Creating an empty list to store values
         start_time = timer()
         LOGGER.info("Starting measurements...")
 
-        for i in range(nth_nmb, -1, -1):                    #nth_nmb being the maxnumber, counting down toward 0.
-            nth_val = func(i)                               #calculating the value by calling respective function
-            nth_list.append(nth_val)                        #appending the value to the empty list
+        for i in range(nth_nmb, -1, -1):                    # nth_nmb being the maxnumber, counting down toward 0.
+            nth_val = func(i)                               # Calculating the value by calling respective function
+            nth_list.append(nth_val)                        # Appending the value to the empty list
 
-            if i % 5 == 0:                                  #making sure to only log each 5th iteration in the logger
+            if i % 5 == 0:                                  # Making sure to only log each 5th iteration in the logger
                 LOGGER.debug(f'{i}: {nth_val}')
 
         end_time = timer()
         duration = end_time - start_time
 
-        return duration, nth_list                          #returning the output as a tuple
-
+        return duration, nth_list                          # Returning the output as a tuple
 
     return wrapper
 
@@ -89,14 +84,12 @@ def fibonacci_recursive(nth_nmb: int) -> int:
 def fibonacci_memory(nth_nmb: int) -> int:
     """An recursive approach to find Fibonacci sequence value, storing those already calculated."""
 
+    # Creating a new dictionary for caching.
     memory = {0: 0, 1: 1}
 
+    # Return n if it's already in memory, and if not, perform fibonacci calculation and store key/value in memory.
     def fib_cal(n):
-        return n if n <= 1 else fib_cal(n - 1) + fib_cal(n - 2)         #calculating value of n
-    num = fib_cal(nth_nmb)                                              #creating a variable in order to update memory
-    new_memory = {nth_nmb: num}                                         #and return it in a more clean approach
-    memory.update(new_memory)
-    return num
+        return n if n in memory else memory[n] == (fib_cal(n - 1) + fib_cal(n - 2))
 
 
 def duration_format(duration: float, precision: str) -> str:
@@ -118,20 +111,19 @@ def print_statistics(fib_details: dict, nth_value: int):
     """Function which handles printing to console."""
     line = '\n' + ("---------------" * 5)
 
-    main_header = "DURATION FOR EACH APPROACH WITHIN INTERVAL: 30-0"
-    print(f'{line}\n{main_header :>60}{line}')
+    main_header = f"DURATION FOR EACH APPROACH WITHIN INTERVAL: {nth_value}-0"
+    print(f'{line}\n{main_header :^75}{line}')
 
-    print(f"\t\t\t\t\t{'Seconds'}\t\t{'Milliseconds'}\t{'Microseconds'}\t{'Nanoseconds'}")
+    print(f"{'Seconds' :>30}{'Milliseconds' : >15}{'Microseconds' : >15}{'Nanoseconds' : >15}")
 
-    for key, val in fib_details.items():                                       #for each key and value in fib_details;
-                                                                               #retrieve duration from the tuple
-        secs = (duration_format(fib_details[key][0], 'Seconds'))               #created in the decorator function, which
-        millisecs = (duration_format(fib_details[key][0], 'Milliseconds'))     #is on position 0 in values. Created
-        microsecs = (duration_format(fib_details[key][0], 'Microseconds'))     #variables to calculate and print them
+    for key, val in fib_details.items():                                     # for each key and value in fib_details;
+                                                                             # retrieve duration from the tuple
+        secs = (duration_format(fib_details[key][0], 'Seconds'))             # created in the decorator function, which
+        millisecs = (duration_format(fib_details[key][0], 'Milliseconds'))   # is on position 0 in values. Created
+        microsecs = (duration_format(fib_details[key][0], 'Microseconds'))   # variables to calculate and print them
         nanosecs = (duration_format(fib_details[key][0], 'Nanoseconds'))
 
-
-        print(f'{key.title():<20}{secs : <12}{millisecs : ^15}{microsecs: >13}{nanosecs : >15}')
+        print(f'{key.title():<15}{secs : >15}{millisecs : >15}{microsecs: >15}{nanosecs : >15}')
 
 
 def write_to_file(fib_details: dict):
