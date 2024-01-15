@@ -33,7 +33,7 @@ def load_seed_from_file(_file_name: str) -> tuple:
         seed_file = _file_name
 
     #  Create a filepath and open it in read-mode. Load the json content and name the containing dictionary to seeds.
-    file_path = RESOURCES / seed_file
+    file_path = Path(RESOURCES / seed_file)
     with open(file_path, 'r') as file:
         seeds = json.load(file)
 

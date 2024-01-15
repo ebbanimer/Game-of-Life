@@ -87,12 +87,12 @@ def fibonacci_memory(nth_nmb: int) -> int:
     # Creating a new dictionary for caching.
     memory = {0: 0, 1: 1}
 
-    # If n is not in memory, perform fibonacci calculation and store it in memory. 
-    def fib(n):
+    # If n is not in memory, perform fibonacci calculation and store it in memory.
+    def fib_cal(n):
         if n not in memory:
-            memory[n] = fib(n - 1) + fib(n - 2)
+            memory[n] = fib_cal(n - 1) + fib_cal(n - 2)
         return memory[n]
-    return fib(nth_nmb)
+    return fib_cal(nth_nmb)
 
 
 def duration_format(duration: float, precision: str) -> str:
